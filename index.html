@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moto 3D con MindAR</title>
+
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+
+    <!-- MindAR -->
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
+  </head>
+
+  <body>
+    <a-scene
+      mindar-image="imageTargetSrc: ./rueda.mind;"
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: true"
+      embedded
+    >
+      <!-- Carga de modelos -->
+      <a-assets>
+        <a-asset-item id="moto3D" src="./rueda.glb"></a-asset-item>
+      </a-assets>
+
+      <!-- Cámara -->
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Cuando detecta la imagen -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-gltf-model
+          src="#moto3D"
+          position="0 -0.1 0"
+          rotation="0 0 0"
+          scale="0.3 0.3 0.3"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 6000"
+        ></a-gltf-model>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
