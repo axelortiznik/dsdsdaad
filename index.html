@@ -1,54 +1,97 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>moto mindar </title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-   
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moto 3D con MindAR</title>
+
+    <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+    <!-- MindAR -->
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.2.0/dist/aframe-extras.min.js"></script>
-</head>
-<body>
+  </head>
 
-    <a-scene mindar-image="imageTargetSrc: rueda.mind; maxTrack: 3; debug: true;"
-            color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true"
-            vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+  <body>
+    <a-scene
+      mindar-image="imageTargetSrc: rueda.mind; autoStart: true; maxTrack: 1;"
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+      embedded
+    >
+      <a-assets>
+        <a-asset-item id="moto" src="./access/rueda.glb"></a-asset-item>
+      </a-assets>
 
-        <a-assets>
-            <a-asset-item id="moto" src="./access/rueda.glb"></a-asset-item>
-        </a-assets>
+      <!-- Luces -->
+      <a-entity light="type: ambient; intensity: 1"></a-entity>
+      <a-entity light="type: directional; intensity: 0.8" position="1 1 1"></a-entity>
 
-        <a-camera
-            position="0 0 0"
-            look-controls="enabled: true">
-        </a-camera>
+      <!-- Target de la imagen -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-entity
+          id="moto3d"
+          gltf-model="#moto"
+          scale="0.5 0.5 0.5"
+          position="0 0 0"
+          rotation="0 0 0"
+        ></a-entity>
+      </a-entity>
+    </a-scene>
 
-        <a-entity mindar-image-target="targetIndex: 0">
-            <a-entity
-                gltf-model="#moto"
-                rotation="0 0 0"              
-                position="0 0 0"            
-                scale="0.5 0.5 0.5"
-                >              
-            </a-entity>
-        </a-entity>
+    <!-- Script para mover con los dedos -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const modelo = document.querySelector("#moto3d");
+        let rotando = false;
+        let zooming = false;
+        let lastX = 0;
+        let lastDist = 0;
+        let currentScale = 0.5;
 
-        </a-scene>
-</body>
+        // Inicia rotación o zoom
+        document.body.addEventListener("touchstart", (e) => {
+          if (e.touches.length === 1) {
+            rotando = true;
+            lastX = e.touches[0].clientX;
+          } else if (e.touches.length === 2) {
+            zooming = true;
+            lastDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+          }
+        });
+
+        // Movimiento táctil
+        document.body.addEventListener("touchmove", (e) => {
+          if (rotando && e.touches.length === 1) {
+            const deltaX = e.touches[0].clientX - lastX;
+            modelo.object3D.rotation.y += deltaX * 0.01;
+            lastX = e.touches[0].clientX;
+          } else if (zooming && e.touches.length === 2) {
+            const newDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            const scaleChange = (newDist - lastDist) * 0.001;
+            currentScale = Math.min(Math.max(currentScale + scaleChange, 0.1), 2);
+            modelo.setAttribute(
+              "scale",
+              `${currentScale} ${currentScale} ${currentScale}`
+            );
+            lastDist = newDist;
+          }
+        });
+
+        // Fin del gesto
+        document.body.addEventListener("touchend", () => {
+          rotando = false;
+          zooming = false;
+        });
+      });
+    </script>
+  </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
